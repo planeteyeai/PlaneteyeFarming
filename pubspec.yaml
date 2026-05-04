@@ -1,0 +1,54 @@
+name: cropeye
+description: CropEye - AI-Driven Farm Management App
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.0
+  geolocator: ^12.0.0
+  http: ^1.2.0
+  intl: ^0.20.2
+  fl_chart: ^0.68.0
+  google_sign_in: ^6.2.1
+  speech_to_text: ^7.0.0
+  image_picker: ^1.1.2
+  http_parser: ^4.0.2
+  google_mlkit_face_detection: ^0.11.0
+  camera: ^0.11.0
+  video_player: ^2.8.0
+  shared_preferences: ^2.2.3
+  video_thumbnail: ^0.5.3
+  flutter_dotenv: ^6.0.0
+  flutter_local_notifications: ^17.2.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/maize_field.png
+    - assets/crops/wheat.png
+    - assets/crops/corn.png
+    - assets/crops/mango_tree.png
+    - assets/crops/seedling.png
+    - assets/crops/apple_tree.png
+    - assets/crops/banana_tree.png
+    - assets/crops/coconut_tree.png
+    - assets/crops/grape_row.png
+    - assets/crops/grape_tree.png
+    - assets/crops/brinjal_plant.png
+    - assets/crops/tomato_plant.png
+    - assets/crops/pepper_plant.png
+    - assets/.env
+    - assets/.env.example

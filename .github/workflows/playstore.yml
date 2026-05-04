@@ -1,0 +1,79 @@
+name: Flutter Play Store CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  # Allow manual trigger from GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout ────────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Java 17 (required by AGP 8+) ───────────────────────────────────
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # ── 3. Flutter ─────────────────────────────────────────────────────────
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.29.0
+          channel: stable
+          cache: true
+
+      # ── 4. Dependencies ────────────────────────────────────────────────────
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      # ── 5. Decode keystore from base64 secret ──────────────────────────────
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > upload-keystore.jks
+
+      # ── 6. Write key.properties ────────────────────────────────────────────
+      - name: Create key.properties
+        run: |
+          cat > android/key.properties <<EOF
+          storePassword=${{ secrets.STORE_PASSWORD }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          keyAlias=upload
+          storeFile=../../upload-keystore.jks
+          EOF
+
+      # ── 7. Build signed AAB ────────────────────────────────────────────────
+      - name: Build release AAB
+        run: |
+          flutter build appbundle --release \
+            --obfuscate \
+            --split-debug-info=build/debug-info \
+            --dart-define=ENV=production
+
+      # ── 8. Upload AAB as artifact (useful for debugging) ───────────────────
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          retention-days: 7
+
+      # ── 9. Deploy to Play Store Internal Testing ───────────────────────────
+      - name: Upload to Play Store (internal track)
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAYSTORE_SERVICE_ACCOUNT }}
+          packageName: com.cropeye.app
+          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          track: internal
+          status: completed
+          # Uncomment to add release notes:
+          # whatsNewDirectory: distribution/whatsnew
